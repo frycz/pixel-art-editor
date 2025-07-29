@@ -13,7 +13,8 @@ class PixelArtEditor {
             saturation: 100,
             colorCount: 32,
             quantizationMethod: 'median-cut',
-            posterizationLevels: 256
+            posterizationLevels: 256,
+            paletteSwap: 'none'
         };
         
         this.initializeEventListeners();
@@ -46,6 +47,12 @@ class PixelArtEditor {
         // Quantization method selector
         document.getElementById('quantizationMethod').addEventListener('change', (e) => {
             this.settings.quantizationMethod = e.target.value;
+            this.updatePixelArt();
+        });
+        
+        // Palette swap selector
+        document.getElementById('paletteSwap').addEventListener('change', (e) => {
+            this.settings.paletteSwap = e.target.value;
             this.updatePixelArt();
         });
         
@@ -153,6 +160,9 @@ class PixelArtEditor {
         
         // Apply posterization
         this.applyPosterization(tempCtx, width, height);
+        
+        // Apply palette swap
+        this.applyPaletteSwap(tempCtx, width, height);
         
         // Apply color quantization
         if (this.settings.quantizationMethod !== 'none') {
@@ -518,6 +528,74 @@ class PixelArtEditor {
         ctx.putImageData(imageData, 0, 0);
     }
     
+    applyPaletteSwap(ctx, width, height) {
+        if (this.settings.paletteSwap === 'none') return;
+        
+        const imageData = ctx.getImageData(0, 0, width, height);
+        const data = imageData.data;
+        
+        for (let i = 0; i < data.length; i += 4) {
+            let r = data[i];
+            let g = data[i + 1];
+            let b = data[i + 2];
+            
+            switch (this.settings.paletteSwap) {
+                case 'grayscale':
+                    const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+                    data[i] = gray;
+                    data[i + 1] = gray;
+                    data[i + 2] = gray;
+                    break;
+                    
+                case 'sepia':
+                    const sepiaR = (r * 0.393) + (g * 0.769) + (b * 0.189);
+                    const sepiaG = (r * 0.349) + (g * 0.686) + (b * 0.168);
+                    const sepiaB = (r * 0.272) + (g * 0.534) + (b * 0.131);
+                    data[i] = Math.min(255, sepiaR);
+                    data[i + 1] = Math.min(255, sepiaG);
+                    data[i + 2] = Math.min(255, sepiaB);
+                    break;
+                    
+                case 'cool':
+                    data[i] = Math.min(255, r * 0.8);
+                    data[i + 1] = Math.min(255, g * 0.9);
+                    data[i + 2] = Math.min(255, b * 1.2);
+                    break;
+                    
+                case 'warm':
+                    data[i] = Math.min(255, r * 1.2);
+                    data[i + 1] = Math.min(255, g * 1.1);
+                    data[i + 2] = Math.min(255, b * 0.8);
+                    break;
+                    
+                case 'vintage':
+                    const vintageR = (r * 0.567) + (g * 0.769) + (b * 0.189);
+                    const vintageG = (r * 0.349) + (g * 0.686) + (b * 0.168);
+                    const vintageB = (r * 0.272) + (g * 0.534) + (b * 0.131);
+                    data[i] = Math.min(255, vintageR * 1.1);
+                    data[i + 1] = Math.min(255, vintageG * 0.9);
+                    data[i + 2] = Math.min(255, vintageB * 0.8);
+                    break;
+                    
+                case 'neon':
+                    const brightness = (r + g + b) / 3;
+                    const neonFactor = brightness / 255;
+                    data[i] = Math.min(255, r + (255 - r) * neonFactor * 0.5);
+                    data[i + 1] = Math.min(255, g + (255 - g) * neonFactor * 0.3);
+                    data[i + 2] = Math.min(255, b + (255 - b) * neonFactor * 0.8);
+                    break;
+                    
+                case 'pastel':
+                    data[i] = Math.min(255, (r + 255) / 2);
+                    data[i + 1] = Math.min(255, (g + 255) / 2);
+                    data[i + 2] = Math.min(255, (b + 255) / 2);
+                    break;
+            }
+        }
+        
+        ctx.putImageData(imageData, 0, 0);
+    }
+    
     applyPixelation(ctx, width, height) {
         const pixelSize = this.settings.pixelSize;
         
@@ -549,7 +627,8 @@ class PixelArtEditor {
             saturation: 100,
             colorCount: 32,
             quantizationMethod: 'median-cut',
-            posterizationLevels: 256
+            posterizationLevels: 256,
+            paletteSwap: 'none'
         };
         
         // Update sliders
@@ -568,8 +647,9 @@ class PixelArtEditor {
         document.getElementById('colorCountValue').textContent = '32';
         document.getElementById('posterizationLevelsValue').textContent = '256';
         
-        // Update select
+        // Update selects
         document.getElementById('quantizationMethod').value = 'median-cut';
+        document.getElementById('paletteSwap').value = 'none';
         
         this.updatePixelArt();
     }
