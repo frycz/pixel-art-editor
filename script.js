@@ -158,10 +158,22 @@ class PixelArtEditor {
                 this.displayOriginalImage();
                 this.updatePixelArt();
                 document.getElementById('editorSection').style.display = 'block';
+                this.makeUploadAreaCompact();
             };
             img.src = e.target.result;
         };
         reader.readAsDataURL(file);
+    }
+    
+    makeUploadAreaCompact() {
+        const uploadArea = document.getElementById('uploadArea');
+        const uploadIcon = uploadArea.querySelector('.upload-icon');
+        const uploadHint = uploadArea.querySelector('.upload-hint');
+        
+        // Remove icon and hint, reduce padding
+        if (uploadIcon) uploadIcon.style.display = 'none';
+        if (uploadHint) uploadHint.style.display = 'none';
+        uploadArea.style.padding = '20px';
     }
     
     displayOriginalImage() {
