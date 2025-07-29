@@ -99,6 +99,16 @@
                         </div>
 
                         <div class="control-group">
+                            <div class="toggle-container">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="quantizationToggle">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <span class="toggle-label">Advanced settings</span>
+                            </div>
+                        </div>
+
+                        <div class="control-group quantization-controls" id="quantizationControls" style="display: none;">
                             <label for="quantizationMethod">Quantization:</label>
                             <select id="quantizationMethod" class="select-control">
                                 <option value="none">None</option>

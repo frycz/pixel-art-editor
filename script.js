@@ -47,8 +47,10 @@ class PixelArtEditor {
     
     updateColorCountVisibility() {
         const colorCountGroup = document.querySelector('[data-control="colorCount"]');
-        if (colorCountGroup) {
-            const shouldShow = this.settings.quantizationMethod !== 'none';
+        const quantizationToggle = document.getElementById('quantizationToggle');
+        
+        if (colorCountGroup && quantizationToggle) {
+            const shouldShow = quantizationToggle.checked && this.settings.quantizationMethod !== 'none';
             colorCountGroup.style.display = shouldShow ? 'flex' : 'none';
         }
     }
@@ -83,6 +85,27 @@ class PixelArtEditor {
             }
         });
         
+        // Quantization toggle
+        document.getElementById('quantizationToggle').addEventListener('change', (e) => {
+            const isEnabled = e.target.checked;
+            const quantizationControls = document.getElementById('quantizationControls');
+            
+            if (isEnabled) {
+                quantizationControls.style.display = 'flex';
+                // Use the current quantization method (don't reset)
+                this.updateColorCountVisibility();
+            } else {
+                quantizationControls.style.display = 'none';
+                // Hide color count when quantization is disabled
+                const colorCountGroup = document.querySelector('[data-control="colorCount"]');
+                if (colorCountGroup) {
+                    colorCountGroup.style.display = 'none';
+                }
+            }
+            
+            this.updatePixelArt();
+        });
+
         // Quantization method selector
         document.getElementById('quantizationMethod').addEventListener('change', (e) => {
             this.settings.quantizationMethod = e.target.value;
@@ -276,8 +299,9 @@ class PixelArtEditor {
             this.applyEdgeDetection(tempCtx, width, height);
         }
         
-        // Apply color quantization
-        if (this.settings.quantizationMethod !== 'none') {
+        // Apply color quantization (only if toggle is enabled)
+        const quantizationToggle = document.getElementById('quantizationToggle');
+        if (quantizationToggle && quantizationToggle.checked && this.settings.quantizationMethod !== 'none') {
             this.applyColorQuantization(tempCtx, width, height);
         }
         
