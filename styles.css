@@ -234,6 +234,25 @@ header p {
     transform: translateY(-2px);
 }
 
+.editor-layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+    align-items: start;
+}
+
+.images-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.controls-section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
 .canvas-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -272,6 +291,11 @@ header p {
     
     header h1 {
         font-size: 2rem;
+    }
+    
+    .editor-layout {
+        grid-template-columns: 1fr;
+        gap: 20px;
     }
     
     .controls-panel {

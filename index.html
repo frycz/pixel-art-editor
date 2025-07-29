@@ -32,135 +32,138 @@
         </div>
 
         <div class="editor-section" id="editorSection" style="display: none;">
-            <div class="controls-panel">
-                <div class="control-group">
-                    <label for="pixelSize">Pixel Size:</label>
-                    <div class="slider-container">
-                        <input type="range" id="pixelSize" min="1" max="50" value="10" class="slider">
-                        <span class="slider-value" id="pixelSizeValue">10</span>
+            <div class="editor-layout">
+                <div class="images-section">
+                    <div class="canvas-wrapper">
+                        <canvas id="pixelCanvas" class="canvas"></canvas>
+                        <div class="canvas-label">Pixel Art</div>
+                    </div>
+                    <div class="canvas-wrapper">
+                        <canvas id="originalCanvas" class="canvas"></canvas>
+                        <div class="canvas-label">Original</div>
                     </div>
                 </div>
+                
+                <div class="controls-section">
+                    <div class="controls-panel">
+                        <div class="control-group">
+                            <label for="pixelSize">Pixel Size:</label>
+                            <div class="slider-container">
+                                <input type="range" id="pixelSize" min="1" max="50" value="10" class="slider">
+                                <span class="slider-value" id="pixelSizeValue">10</span>
+                            </div>
+                        </div>
 
-                <div class="control-group">
-                    <label for="contrast">Contrast:</label>
-                    <div class="slider-container">
-                        <input type="range" id="contrast" min="0" max="200" value="100" class="slider">
-                        <span class="slider-value" id="contrastValue">100</span>
+                        <div class="control-group">
+                            <label for="contrast">Contrast:</label>
+                            <div class="slider-container">
+                                <input type="range" id="contrast" min="0" max="200" value="100" class="slider">
+                                <span class="slider-value" id="contrastValue">100</span>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="brightness">Brightness:</label>
+                            <div class="slider-container">
+                                <input type="range" id="brightness" min="0" max="200" value="100" class="slider">
+                                <span class="slider-value" id="brightnessValue">100</span>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="saturation">Saturation:</label>
+                            <div class="slider-container">
+                                <input type="range" id="saturation" min="0" max="200" value="100" class="slider">
+                                <span class="slider-value" id="saturationValue">100</span>
+                            </div>
+                        </div>
+
+                        <div class="control-group" data-control="colorCount">
+                            <label for="colorCount">Color Count:</label>
+                            <div class="slider-container">
+                                <input type="range" id="colorCount" min="2" max="256" value="32" class="slider">
+                                <span class="slider-value" id="colorCountValue">32</span>
+                            </div>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="quantizationMethod">Quantization:</label>
+                            <select id="quantizationMethod" class="select-control">
+                                <option value="median-cut">Median Cut</option>
+                                <option value="k-means">K-Means</option>
+                                <option value="octree">Octree</option>
+                                <option value="none">None</option>
+                            </select>
+                        </div>
                     </div>
-                </div>
 
-                <div class="control-group">
-                    <label for="brightness">Brightness:</label>
-                    <div class="slider-container">
-                        <input type="range" id="brightness" min="0" max="200" value="100" class="slider">
-                        <span class="slider-value" id="brightnessValue">100</span>
+                    <div class="palette-section">
+                        <div class="control-group">
+                            <label for="paletteSwap">Palette Swap:</label>
+                            <select id="paletteSwap" class="select-control">
+                                <option value="none">None</option>
+                                <option value="grayscale">Grayscale</option>
+                                <option value="sepia">Sepia</option>
+                                <option value="cool">Cool (Blue)</option>
+                                <option value="warm">Warm (Orange)</option>
+                                <option value="vintage">Vintage</option>
+                                <option value="neon">Neon</option>
+                                <option value="pastel">Pastel</option>
+                            </select>
+                        </div>
                     </div>
-                </div>
 
-                <div class="control-group">
-                    <label for="saturation">Saturation:</label>
-                    <div class="slider-container">
-                        <input type="range" id="saturation" min="0" max="200" value="100" class="slider">
-                        <span class="slider-value" id="saturationValue">100</span>
+                    <div class="controls-panel">
+                        <div class="control-group" data-control="posterizationLevels">
+                            <label for="posterizationLevels">Posterization Levels:</label>
+                            <div class="slider-container">
+                                <input type="range" id="posterizationLevels" min="2" max="256" value="256" class="slider">
+                                <span class="slider-value" id="posterizationLevelsValue">256</span>
+                            </div>
+                        </div>
+
+                        <div class="control-group" data-control="outlineDetection">
+                            <label for="outlineDetection">Outline Detection:</label>
+                            <select id="outlineDetection" class="select-control">
+                                <option value="none">None</option>
+                                <option value="simple">Simple</option>
+                                <option value="sobel">Sobel</option>
+                                <option value="canny">Canny</option>
+                                <option value="laplacian">Laplacian</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group" data-control="outlineStrength">
+                            <label for="outlineStrength">Outline Strength:</label>
+                            <div class="slider-container">
+                                <input type="range" id="outlineStrength" min="0" max="100" value="75" class="slider">
+                                <span class="slider-value" id="outlineStrengthValue">75</span>
+                            </div>
+                        </div>
+
+                        <div class="control-group" data-control="edgeDetection">
+                            <label for="edgeDetection">Edge Detection:</label>
+                            <select id="edgeDetection" class="select-control">
+                                <option value="none">None</option>
+                                <option value="sobel">Sobel</option>
+                                <option value="canny">Canny</option>
+                                <option value="laplacian">Laplacian</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group" data-control="edgeStrength">
+                            <label for="edgeStrength">Edge Strength:</label>
+                            <div class="slider-container">
+                                <input type="range" id="edgeStrength" min="0" max="100" value="50" class="slider">
+                                <span class="slider-value" id="edgeStrengthValue">50</span>
+                            </div>
+                        </div>
+
+                        <div class="button-group">
+                            <button id="resetBtn" class="btn btn-secondary">Reset</button>
+                            <button id="downloadBtn" class="btn btn-primary">Download</button>
+                        </div>
                     </div>
-                </div>
-
-                <div class="control-group" data-control="colorCount">
-                    <label for="colorCount">Color Count:</label>
-                    <div class="slider-container">
-                        <input type="range" id="colorCount" min="2" max="256" value="32" class="slider">
-                        <span class="slider-value" id="colorCountValue">32</span>
-                    </div>
-                </div>
-
-                <div class="control-group">
-                    <label for="quantizationMethod">Quantization:</label>
-                    <select id="quantizationMethod" class="select-control">
-                        <option value="median-cut">Median Cut</option>
-                        <option value="k-means">K-Means</option>
-                        <option value="octree">Octree</option>
-                        <option value="none">None</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="palette-section">
-                <div class="control-group">
-                    <label for="paletteSwap">Palette Swap:</label>
-                    <select id="paletteSwap" class="select-control">
-                        <option value="none">None</option>
-                        <option value="grayscale">Grayscale</option>
-                        <option value="sepia">Sepia</option>
-                        <option value="cool">Cool (Blue)</option>
-                        <option value="warm">Warm (Orange)</option>
-                        <option value="vintage">Vintage</option>
-                        <option value="neon">Neon</option>
-                        <option value="pastel">Pastel</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="controls-panel">
-
-                <div class="control-group" data-control="posterizationLevels">
-                    <label for="posterizationLevels">Posterization Levels:</label>
-                    <div class="slider-container">
-                        <input type="range" id="posterizationLevels" min="2" max="256" value="256" class="slider">
-                        <span class="slider-value" id="posterizationLevelsValue">256</span>
-                    </div>
-                </div>
-
-                <div class="control-group" data-control="outlineDetection">
-                    <label for="outlineDetection">Outline Detection:</label>
-                    <select id="outlineDetection" class="select-control">
-                        <option value="none">None</option>
-                        <option value="simple">Simple</option>
-                        <option value="sobel">Sobel</option>
-                        <option value="canny">Canny</option>
-                        <option value="laplacian">Laplacian</option>
-                    </select>
-                </div>
-
-                <div class="control-group" data-control="outlineStrength">
-                    <label for="outlineStrength">Outline Strength:</label>
-                    <div class="slider-container">
-                        <input type="range" id="outlineStrength" min="0" max="100" value="75" class="slider">
-                        <span class="slider-value" id="outlineStrengthValue">75</span>
-                    </div>
-                </div>
-
-                <div class="control-group" data-control="edgeDetection">
-                    <label for="edgeDetection">Edge Detection:</label>
-                    <select id="edgeDetection" class="select-control">
-                        <option value="none">None</option>
-                        <option value="sobel">Sobel</option>
-                        <option value="canny">Canny</option>
-                        <option value="laplacian">Laplacian</option>
-                    </select>
-                </div>
-
-                <div class="control-group" data-control="edgeStrength">
-                    <label for="edgeStrength">Edge Strength:</label>
-                    <div class="slider-container">
-                        <input type="range" id="edgeStrength" min="0" max="100" value="50" class="slider">
-                        <span class="slider-value" id="edgeStrengthValue">50</span>
-                    </div>
-                </div>
-
-                <div class="button-group">
-                    <button id="resetBtn" class="btn btn-secondary">Reset</button>
-                    <button id="downloadBtn" class="btn btn-primary">Download</button>
-                </div>
-            </div>
-
-            <div class="canvas-container">
-                <div class="canvas-wrapper">
-                    <canvas id="originalCanvas" class="canvas"></canvas>
-                    <div class="canvas-label">Original</div>
-                </div>
-                <div class="canvas-wrapper">
-                    <canvas id="pixelCanvas" class="canvas"></canvas>
-                    <div class="canvas-label">Pixel Art</div>
                 </div>
             </div>
         </div>
