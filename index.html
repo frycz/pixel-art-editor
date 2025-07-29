@@ -62,6 +62,24 @@
                     </div>
                 </div>
 
+                <div class="control-group">
+                    <label for="colorCount">Color Count:</label>
+                    <div class="slider-container">
+                        <input type="range" id="colorCount" min="2" max="256" value="32" class="slider">
+                        <span class="slider-value" id="colorCountValue">32</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="quantizationMethod">Quantization:</label>
+                    <select id="quantizationMethod" class="select-control">
+                        <option value="median-cut">Median Cut</option>
+                        <option value="k-means">K-Means</option>
+                        <option value="octree">Octree</option>
+                        <option value="none">None</option>
+                    </select>
+                </div>
+
                 <div class="button-group">
                     <button id="resetBtn" class="btn btn-secondary">Reset</button>
                     <button id="downloadBtn" class="btn btn-primary">Download</button>

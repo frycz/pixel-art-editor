@@ -10,7 +10,9 @@ class PixelArtEditor {
             pixelSize: 10,
             contrast: 100,
             brightness: 100,
-            saturation: 100
+            saturation: 100,
+            colorCount: 32,
+            quantizationMethod: 'median-cut'
         };
         
         this.initializeEventListeners();
@@ -28,7 +30,7 @@ class PixelArtEditor {
         fileInput.addEventListener('change', this.handleFileSelect.bind(this));
         
         // Controls
-        const controls = ['pixelSize', 'contrast', 'brightness', 'saturation'];
+        const controls = ['pixelSize', 'contrast', 'brightness', 'saturation', 'colorCount'];
         controls.forEach(control => {
             const slider = document.getElementById(control);
             const valueDisplay = document.getElementById(control + 'Value');
@@ -38,6 +40,12 @@ class PixelArtEditor {
                 valueDisplay.textContent = e.target.value;
                 this.updatePixelArt();
             });
+        });
+        
+        // Quantization method selector
+        document.getElementById('quantizationMethod').addEventListener('change', (e) => {
+            this.settings.quantizationMethod = e.target.value;
+            this.updatePixelArt();
         });
         
         // Buttons
@@ -142,6 +150,11 @@ class PixelArtEditor {
         // Apply filters
         this.applyFilters(tempCtx, width, height);
         
+        // Apply color quantization
+        if (this.settings.quantizationMethod !== 'none') {
+            this.applyColorQuantization(tempCtx, width, height);
+        }
+        
         // Apply pixelation
         this.applyPixelation(tempCtx, width, height);
         
@@ -188,6 +201,301 @@ class PixelArtEditor {
         ctx.putImageData(imageData, 0, 0);
     }
     
+    applyColorQuantization(ctx, width, height) {
+        const imageData = ctx.getImageData(0, 0, width, height);
+        const data = imageData.data;
+        
+        // Extract all unique colors
+        const colorMap = new Map();
+        for (let i = 0; i < data.length; i += 4) {
+            const color = `${data[i]},${data[i + 1]},${data[i + 2]}`;
+            colorMap.set(color, (colorMap.get(color) || 0) + 1);
+        }
+        
+        // Generate palette based on method
+        let palette;
+        switch (this.settings.quantizationMethod) {
+            case 'median-cut':
+                palette = this.medianCutQuantization(colorMap);
+                break;
+            case 'k-means':
+                palette = this.kMeansQuantization(colorMap);
+                break;
+            case 'octree':
+                palette = this.octreeQuantization(colorMap);
+                break;
+            default:
+                return;
+        }
+        
+        // Replace colors with nearest palette color
+        for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            
+            const nearestColor = this.findNearestColor(r, g, b, palette);
+            data[i] = nearestColor.r;
+            data[i + 1] = nearestColor.g;
+            data[i + 2] = nearestColor.b;
+        }
+        
+        ctx.putImageData(imageData, 0, 0);
+    }
+    
+    medianCutQuantization(colorMap) {
+        const colors = Array.from(colorMap.keys()).map(color => {
+            const [r, g, b] = color.split(',').map(Number);
+            return { r, g, b, count: colorMap.get(color) };
+        });
+        
+        const palette = this.medianCut(colors, this.settings.colorCount);
+        return palette;
+    }
+    
+    medianCut(colors, targetColors) {
+        // Base case: if we have fewer colors than target, return all colors
+        if (colors.length <= targetColors) {
+            return colors.map(c => ({ r: c.r, g: c.g, b: c.b }));
+        }
+        
+        // Base case: if target is 1, return average color
+        if (targetColors <= 1) {
+            const avgR = Math.round(colors.reduce((sum, c) => sum + c.r, 0) / colors.length);
+            const avgG = Math.round(colors.reduce((sum, c) => sum + c.g, 0) / colors.length);
+            const avgB = Math.round(colors.reduce((sum, c) => sum + c.b, 0) / colors.length);
+            return [{ r: avgR, g: avgG, b: avgB }];
+        }
+        
+        // Find the color channel with the greatest range
+        let minR = 255, maxR = 0, minG = 255, maxG = 0, minB = 255, maxB = 0;
+        colors.forEach(color => {
+            minR = Math.min(minR, color.r);
+            maxR = Math.max(maxR, color.r);
+            minG = Math.min(minG, color.g);
+            maxG = Math.max(maxG, color.g);
+            minB = Math.min(minB, color.b);
+            maxB = Math.max(maxB, color.b);
+        });
+        
+        const rangeR = maxR - minR;
+        const rangeG = maxG - minG;
+        const rangeB = maxB - minB;
+        
+        // If all ranges are 0, colors are identical, return average
+        if (rangeR === 0 && rangeG === 0 && rangeB === 0) {
+            const avgR = Math.round(colors.reduce((sum, c) => sum + c.r, 0) / colors.length);
+            const avgG = Math.round(colors.reduce((sum, c) => sum + c.g, 0) / colors.length);
+            const avgB = Math.round(colors.reduce((sum, c) => sum + c.b, 0) / colors.length);
+            return [{ r: avgR, g: avgG, b: avgB }];
+        }
+        
+        // Sort by the channel with the greatest range
+        if (rangeR >= rangeG && rangeR >= rangeB) {
+            colors.sort((a, b) => a.r - b.r);
+        } else if (rangeG >= rangeB) {
+            colors.sort((a, b) => a.g - b.g);
+        } else {
+            colors.sort((a, b) => a.b - b.b);
+        }
+        
+        // Split at median
+        const mid = Math.floor(colors.length / 2);
+        const left = colors.slice(0, mid);
+        const right = colors.slice(mid);
+        
+        // Ensure we don't have empty arrays
+        if (left.length === 0 || right.length === 0) {
+            const avgR = Math.round(colors.reduce((sum, c) => sum + c.r, 0) / colors.length);
+            const avgG = Math.round(colors.reduce((sum, c) => sum + c.g, 0) / colors.length);
+            const avgB = Math.round(colors.reduce((sum, c) => sum + c.b, 0) / colors.length);
+            return [{ r: avgR, g: avgG, b: avgB }];
+        }
+        
+        // Recursively process both halves with proper distribution
+        const leftTarget = Math.max(1, Math.floor(targetColors / 2));
+        const rightTarget = Math.max(1, targetColors - leftTarget);
+        
+        const leftPalette = this.medianCut(left, leftTarget);
+        const rightPalette = this.medianCut(right, rightTarget);
+        
+        return [...leftPalette, ...rightPalette];
+    }
+    
+    kMeansQuantization(colorMap) {
+        const colors = Array.from(colorMap.keys()).map(color => {
+            const [r, g, b] = color.split(',').map(Number);
+            return { r, g, b, count: colorMap.get(color) };
+        });
+        
+        // Initialize centroids randomly
+        const centroids = [];
+        for (let i = 0; i < this.settings.colorCount; i++) {
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            centroids.push({ r: randomColor.r, g: randomColor.g, b: randomColor.b });
+        }
+        
+        // K-means clustering
+        for (let iteration = 0; iteration < 10; iteration++) {
+            const clusters = Array.from({ length: this.settings.colorCount }, () => []);
+            
+            // Assign colors to nearest centroid
+            colors.forEach(color => {
+                let minDistance = Infinity;
+                let nearestCentroid = 0;
+                
+                centroids.forEach((centroid, index) => {
+                    const distance = this.colorDistance(color, centroid);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        nearestCentroid = index;
+                    }
+                });
+                
+                clusters[nearestCentroid].push(color);
+            });
+            
+            // Update centroids
+            centroids.forEach((centroid, index) => {
+                if (clusters[index].length > 0) {
+                    const avgR = clusters[index].reduce((sum, c) => sum + c.r, 0) / clusters[index].length;
+                    const avgG = clusters[index].reduce((sum, c) => sum + c.g, 0) / clusters[index].length;
+                    const avgB = clusters[index].reduce((sum, c) => sum + c.b, 0) / clusters[index].length;
+                    
+                    centroid.r = Math.round(avgR);
+                    centroid.g = Math.round(avgG);
+                    centroid.b = Math.round(avgB);
+                }
+            });
+        }
+        
+        return centroids;
+    }
+    
+    octreeQuantization(colorMap) {
+        const colors = Array.from(colorMap.keys()).map(color => {
+            const [r, g, b] = color.split(',').map(Number);
+            return { r, g, b, count: colorMap.get(color) };
+        });
+        
+        // Build octree
+        const octree = this.buildOctree(colors);
+        
+        // Reduce octree to target number of colors
+        this.reduceOctree(octree, this.settings.colorCount);
+        
+        // Extract palette from octree leaves
+        const palette = [];
+        this.extractPalette(octree, palette);
+        
+        return palette;
+    }
+    
+    buildOctree(colors) {
+        const root = { children: [], isLeaf: false, colors: [] };
+        
+        colors.forEach(color => {
+            this.insertColor(root, color, 0);
+        });
+        
+        return root;
+    }
+    
+    insertColor(node, color, level) {
+        if (level === 8) {
+            node.isLeaf = true;
+            node.colors.push(color);
+            return;
+        }
+        
+        const index = this.getOctreeIndex(color, level);
+        if (!node.children[index]) {
+            node.children[index] = { children: [], isLeaf: false, colors: [] };
+        }
+        
+        this.insertColor(node.children[index], color, level + 1);
+    }
+    
+    getOctreeIndex(color, level) {
+        const shift = 7 - level;
+        const r = (color.r >> shift) & 1;
+        const g = (color.g >> shift) & 1;
+        const b = (color.b >> shift) & 1;
+        return (r << 2) | (g << 1) | b;
+    }
+    
+    reduceOctree(node, targetColors) {
+        if (node.isLeaf) return;
+        
+        const leaves = this.getLeaves(node);
+        if (leaves.length <= targetColors) return;
+        
+        // Sort leaves by color count and merge smallest
+        leaves.sort((a, b) => a.colors.length - b.colors.length);
+        
+        while (leaves.length > targetColors) {
+            const leaf = leaves.shift();
+            leaf.isLeaf = false;
+            leaf.children = [];
+        }
+    }
+    
+    getLeaves(node) {
+        const leaves = [];
+        this.collectLeaves(node, leaves);
+        return leaves;
+    }
+    
+    collectLeaves(node, leaves) {
+        if (node.isLeaf) {
+            leaves.push(node);
+        } else {
+            node.children.forEach(child => {
+                if (child) this.collectLeaves(child, leaves);
+            });
+        }
+    }
+    
+    extractPalette(node, palette) {
+        if (node.isLeaf && node.colors.length > 0) {
+            const avgR = node.colors.reduce((sum, c) => sum + c.r, 0) / node.colors.length;
+            const avgG = node.colors.reduce((sum, c) => sum + c.g, 0) / node.colors.length;
+            const avgB = node.colors.reduce((sum, c) => sum + c.b, 0) / node.colors.length;
+            
+            palette.push({
+                r: Math.round(avgR),
+                g: Math.round(avgG),
+                b: Math.round(avgB)
+            });
+        } else {
+            node.children.forEach(child => {
+                if (child) this.extractPalette(child, palette);
+            });
+        }
+    }
+    
+    findNearestColor(r, g, b, palette) {
+        let minDistance = Infinity;
+        let nearestColor = palette[0];
+        
+        palette.forEach(color => {
+            const distance = this.colorDistance({ r, g, b }, color);
+            if (distance < minDistance) {
+                minDistance = distance;
+                nearestColor = color;
+            }
+        });
+        
+        return nearestColor;
+    }
+    
+    colorDistance(color1, color2) {
+        const dr = color1.r - color2.r;
+        const dg = color1.g - color2.g;
+        const db = color1.b - color2.b;
+        return dr * dr + dg * dg + db * db;
+    }
+    
     applyPixelation(ctx, width, height) {
         const pixelSize = this.settings.pixelSize;
         
@@ -216,7 +524,9 @@ class PixelArtEditor {
             pixelSize: 10,
             contrast: 100,
             brightness: 100,
-            saturation: 100
+            saturation: 100,
+            colorCount: 32,
+            quantizationMethod: 'median-cut'
         };
         
         // Update sliders
@@ -224,12 +534,17 @@ class PixelArtEditor {
         document.getElementById('contrast').value = 100;
         document.getElementById('brightness').value = 100;
         document.getElementById('saturation').value = 100;
+        document.getElementById('colorCount').value = 32;
         
         // Update displays
         document.getElementById('pixelSizeValue').textContent = '10';
         document.getElementById('contrastValue').textContent = '100';
         document.getElementById('brightnessValue').textContent = '100';
         document.getElementById('saturationValue').textContent = '100';
+        document.getElementById('colorCountValue').textContent = '32';
+        
+        // Update select
+        document.getElementById('quantizationMethod').value = 'median-cut';
         
         this.updatePixelArt();
     }

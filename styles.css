@@ -164,6 +164,27 @@ header p {
     font-size: 0.9rem;
 }
 
+.select-control {
+    padding: 8px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    background: white;
+    font-size: 0.9rem;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.select-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.select-control:hover {
+    border-color: #764ba2;
+}
+
 .button-group {
     display: flex;
     gap: 15px;
