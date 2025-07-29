@@ -116,6 +116,7 @@ class PixelArtEditor {
         document.getElementById('resetBtn').addEventListener('click', this.resetSettings.bind(this));
         document.getElementById('downloadBtn').addEventListener('click', this.downloadImage.bind(this));
         document.getElementById('toggleOriginalBtn').addEventListener('click', this.toggleOriginal.bind(this));
+        document.getElementById('newImageBtn').addEventListener('click', this.newImage.bind(this));
     }
     
     handleDragOver(e) {
@@ -141,6 +142,14 @@ class PixelArtEditor {
     handleFileSelect(e) {
         const file = e.target.files[0];
         if (file) {
+            // Reset editor state before loading new image
+            this.originalImage = null;
+            this.resetSettings();
+            
+            // Clear canvases
+            this.originalCtx.clearRect(0, 0, this.originalCanvas.width, this.originalCanvas.height);
+            this.pixelCtx.clearRect(0, 0, this.pixelCanvas.width, this.pixelCanvas.height);
+            
             this.loadImage(file);
         }
     }
@@ -167,14 +176,8 @@ class PixelArtEditor {
     }
     
     makeUploadAreaCompact() {
-        const uploadArea = document.getElementById('uploadArea');
-        const uploadIcon = uploadArea.querySelector('.upload-icon');
-        const uploadHint = uploadArea.querySelector('.upload-hint');
-        
-        // Remove icon and hint, reduce padding
-        if (uploadIcon) uploadIcon.style.display = 'none';
-        if (uploadHint) uploadHint.style.display = 'none';
-        uploadArea.style.padding = '20px';
+        const uploadSection = document.getElementById('uploadSection');
+        uploadSection.style.display = 'none';
     }
     
     toggleOriginal() {
@@ -198,6 +201,11 @@ class PixelArtEditor {
             imagesContainer.classList.add('single-image');
             toggleBtn.textContent = 'Show Original';
         }
+    }
+    
+    newImage() {
+        // Open file selection dialog
+        document.getElementById('fileInput').click();
     }
     
     displayOriginalImage() {

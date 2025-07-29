@@ -248,6 +248,7 @@ header p {
 .images-header {
     display: flex;
     justify-content: center;
+    gap: 15px;
     margin-bottom: 10px;
 }
 
