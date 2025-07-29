@@ -84,25 +84,7 @@
                             </div>
                         </div>
 
-                        <div class="control-group" data-control="colorCount">
-                            <label for="colorCount">Color Count:</label>
-                            <div class="slider-container">
-                                <input type="range" id="colorCount" min="2" max="256" value="32" class="slider">
-                                <span class="slider-value" id="colorCountValue">32</span>
-                            </div>
-                        </div>
-
-                        <div class="control-group">
-                            <label for="quantizationMethod">Quantization:</label>
-                                                    <select id="quantizationMethod" class="select-control">
-                            <option value="none">None</option>
-                            <option value="median-cut">Median Cut</option>
-                            <option value="k-means">K-Means</option>
-                            <option value="octree">Octree</option>
-                        </select>
-                        </div>
-
-                        <div class="control-group">
+                                                <div class="control-group">
                             <label for="paletteSwap">Palette Swap:</label>
                             <select id="paletteSwap" class="select-control">
                                 <option value="none">None</option>
@@ -114,6 +96,24 @@
                                 <option value="neon">Neon</option>
                                 <option value="pastel">Pastel</option>
                             </select>
+                        </div>
+
+                        <div class="control-group">
+                            <label for="quantizationMethod">Quantization:</label>
+                            <select id="quantizationMethod" class="select-control">
+                                <option value="none">None</option>
+                                <option value="median-cut">Median Cut</option>
+                                <option value="k-means">K-Means</option>
+                                <option value="octree">Octree</option>
+                            </select>
+                        </div>
+
+                        <div class="control-group" data-control="colorCount">
+                            <label for="colorCount">Color Count:</label>
+                            <div class="slider-container">
+                                <input type="range" id="colorCount" min="2" max="256" value="32" class="slider">
+                                <span class="slider-value" id="colorCountValue">32</span>
+                            </div>
                         </div>
                     </div>
 
