@@ -168,10 +168,10 @@ class PixelArtEditor {
             
             // Apply contrast
             const contrastFactor = (this.settings.contrast - 100) / 100;
-            const factor = (259 * (contrastFactor + 255)) / (255 * (259 - contrastFactor));
-            r = Math.max(0, Math.min(255, factor * (r - 128) + 128));
-            g = Math.max(0, Math.min(255, factor * (g - 128) + 128));
-            b = Math.max(0, Math.min(255, factor * (b - 128) + 128));
+            const factor = 1 + contrastFactor;
+            r = Math.max(0, Math.min(255, ((r - 128) * factor) + 128));
+            g = Math.max(0, Math.min(255, ((g - 128) * factor) + 128));
+            b = Math.max(0, Math.min(255, ((b - 128) * factor) + 128));
             
             // Apply saturation
             const saturationFactor = this.settings.saturation / 100;
