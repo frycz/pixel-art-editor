@@ -254,14 +254,18 @@ header p {
 }
 
 .images-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
     gap: 20px;
     transition: all 0.3s ease;
 }
 
 .images-container.single-image {
-    grid-template-columns: 1fr;
+    justify-content: center;
+}
+
+.images-container.single-image #pixelCanvasWrapper {
+    flex: 1.5;
+    max-width: 80%;
 }
 
 .canvas-wrapper {
@@ -270,18 +274,26 @@ header p {
     align-items: center;
     gap: 15px;
     transition: all 0.3s ease;
+    flex: 1;
 }
 
 #originalCanvasWrapper {
     transition: all 0.3s ease;
     opacity: 1;
     transform: scale(1);
+    width: 100%;
+    height: auto;
 }
 
 #originalCanvasWrapper.hidden {
     opacity: 0;
     transform: scale(0.8);
     pointer-events: none;
+    flex: 0;
+    width: 0;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
 }
 
 #pixelCanvasWrapper {
@@ -344,7 +356,7 @@ header p {
     }
     
     .images-container {
-        grid-template-columns: 1fr;
+        flex-direction: column;
         gap: 15px;
     }
     
