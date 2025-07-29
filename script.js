@@ -12,12 +12,12 @@ class PixelArtEditor {
         this.pixelCtx = this.pixelCanvas.getContext('2d');
         
         this.settings = {
-            pixelSize: 10,
+            pixelSize: 1,
             contrast: 100,
             brightness: 100,
             saturation: 100,
             colorCount: 32,
-            quantizationMethod: 'median-cut',
+            quantizationMethod: 'none',
             posterizationLevels: 256,
             paletteSwap: 'none',
             outlineDetection: 'none',
@@ -1003,12 +1003,12 @@ class PixelArtEditor {
     
     resetSettings() {
         this.settings = {
-            pixelSize: 10,
+            pixelSize: 1,
             contrast: 100,
             brightness: 100,
             saturation: 100,
             colorCount: 32,
-            quantizationMethod: 'median-cut',
+            quantizationMethod: 'none',
             posterizationLevels: 256,
             paletteSwap: 'none',
             outlineDetection: 'none',
@@ -1018,7 +1018,7 @@ class PixelArtEditor {
         };
         
         // Update sliders
-        document.getElementById('pixelSize').value = 10;
+        document.getElementById('pixelSize').value = 1;
         document.getElementById('contrast').value = 100;
         document.getElementById('brightness').value = 100;
         document.getElementById('saturation').value = 100;
@@ -1028,7 +1028,7 @@ class PixelArtEditor {
         document.getElementById('edgeStrength').value = 50;
         
         // Update displays
-        document.getElementById('pixelSizeValue').textContent = '10';
+        document.getElementById('pixelSizeValue').textContent = '1';
         document.getElementById('contrastValue').textContent = '100';
         document.getElementById('brightnessValue').textContent = '100';
         document.getElementById('saturationValue').textContent = '100';
@@ -1038,7 +1038,7 @@ class PixelArtEditor {
         document.getElementById('edgeStrengthValue').textContent = '50';
         
         // Update selects
-        document.getElementById('quantizationMethod').value = 'median-cut';
+        document.getElementById('quantizationMethod').value = 'none';
         document.getElementById('paletteSwap').value = 'none';
         document.getElementById('outlineDetection').value = 'none';
         document.getElementById('edgeDetection').value = 'none';
