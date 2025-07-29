@@ -17,7 +17,7 @@ class PixelArtEditor {
             brightness: 100,
             saturation: 100,
             colorCount: 32,
-            quantizationMethod: 'none',
+            quantizationMethod: 'median-cut',
             posterizationLevels: 256,
             paletteSwap: 'none',
             outlineDetection: 'none',
@@ -46,12 +46,11 @@ class PixelArtEditor {
     }
     
     updateColorCountVisibility() {
-        const colorCountGroup = document.querySelector('[data-control="colorCount"]');
+        const quantizationControls = document.getElementById('quantizationControls');
         const quantizationToggle = document.getElementById('quantizationToggle');
         
-        if (colorCountGroup && quantizationToggle) {
-            const shouldShow = quantizationToggle.checked && this.settings.quantizationMethod !== 'none';
-            colorCountGroup.style.display = shouldShow ? 'flex' : 'none';
+        if (quantizationControls && quantizationToggle) {
+            quantizationControls.style.display = quantizationToggle.checked ? 'flex' : 'none';
         }
     }
 
@@ -92,26 +91,14 @@ class PixelArtEditor {
             
             if (isEnabled) {
                 quantizationControls.style.display = 'flex';
-                // Use the current quantization method (don't reset)
-                this.updateColorCountVisibility();
             } else {
                 quantizationControls.style.display = 'none';
-                // Hide color count when quantization is disabled
-                const colorCountGroup = document.querySelector('[data-control="colorCount"]');
-                if (colorCountGroup) {
-                    colorCountGroup.style.display = 'none';
-                }
             }
             
             this.updatePixelArt();
         });
 
-        // Quantization method selector
-        document.getElementById('quantizationMethod').addEventListener('change', (e) => {
-            this.settings.quantizationMethod = e.target.value;
-            this.updateColorCountVisibility();
-            this.updatePixelArt();
-        });
+
         
         // Palette swap selector
         document.getElementById('paletteSwap').addEventListener('change', (e) => {
@@ -301,7 +288,7 @@ class PixelArtEditor {
         
         // Apply color quantization (only if toggle is enabled)
         const quantizationToggle = document.getElementById('quantizationToggle');
-        if (quantizationToggle && quantizationToggle.checked && this.settings.quantizationMethod !== 'none') {
+        if (quantizationToggle && quantizationToggle.checked) {
             this.applyColorQuantization(tempCtx, width, height);
         }
         
@@ -1032,7 +1019,7 @@ class PixelArtEditor {
             brightness: 100,
             saturation: 100,
             colorCount: 32,
-            quantizationMethod: 'none',
+            quantizationMethod: 'median-cut',
             posterizationLevels: 256,
             paletteSwap: 'none',
             outlineDetection: 'none',
@@ -1062,7 +1049,6 @@ class PixelArtEditor {
         document.getElementById('edgeStrengthValue').textContent = '50';
         
         // Update selects
-        document.getElementById('quantizationMethod').value = 'none';
         document.getElementById('paletteSwap').value = 'none';
         document.getElementById('outlineDetection').value = 'none';
         document.getElementById('edgeDetection').value = 'none';
