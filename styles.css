@@ -247,6 +247,51 @@ header p {
     gap: 20px;
 }
 
+.images-header {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+.images-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    transition: all 0.3s ease;
+}
+
+.images-container.single-image {
+    grid-template-columns: 1fr;
+}
+
+.canvas-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    transition: all 0.3s ease;
+}
+
+#originalCanvasWrapper {
+    transition: all 0.3s ease;
+    opacity: 1;
+    transform: scale(1);
+}
+
+#originalCanvasWrapper.hidden {
+    opacity: 0;
+    transform: scale(0.8);
+    pointer-events: none;
+}
+
+#pixelCanvasWrapper {
+    transition: all 0.3s ease;
+}
+
+#pixelCanvasWrapper.expanded {
+    transform: scale(1.05);
+}
+
 .controls-section {
     display: flex;
     flex-direction: column;
@@ -296,6 +341,11 @@ header p {
     .editor-layout {
         grid-template-columns: 1fr;
         gap: 20px;
+    }
+    
+    .images-container {
+        grid-template-columns: 1fr;
+        gap: 15px;
     }
     
     .controls-panel {

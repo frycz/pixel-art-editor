@@ -115,6 +115,7 @@ class PixelArtEditor {
         // Buttons
         document.getElementById('resetBtn').addEventListener('click', this.resetSettings.bind(this));
         document.getElementById('downloadBtn').addEventListener('click', this.downloadImage.bind(this));
+        document.getElementById('toggleOriginalBtn').addEventListener('click', this.toggleOriginal.bind(this));
     }
     
     handleDragOver(e) {
@@ -174,6 +175,29 @@ class PixelArtEditor {
         if (uploadIcon) uploadIcon.style.display = 'none';
         if (uploadHint) uploadHint.style.display = 'none';
         uploadArea.style.padding = '20px';
+    }
+    
+    toggleOriginal() {
+        const toggleBtn = document.getElementById('toggleOriginalBtn');
+        const originalWrapper = document.getElementById('originalCanvasWrapper');
+        const pixelWrapper = document.getElementById('pixelCanvasWrapper');
+        const imagesContainer = document.querySelector('.images-container');
+        
+        const isHidden = originalWrapper.classList.contains('hidden');
+        
+        if (isHidden) {
+            // Show original
+            originalWrapper.classList.remove('hidden');
+            pixelWrapper.classList.remove('expanded');
+            imagesContainer.classList.remove('single-image');
+            toggleBtn.textContent = 'Hide Original';
+        } else {
+            // Hide original
+            originalWrapper.classList.add('hidden');
+            pixelWrapper.classList.add('expanded');
+            imagesContainer.classList.add('single-image');
+            toggleBtn.textContent = 'Show Original';
+        }
     }
     
     displayOriginalImage() {
