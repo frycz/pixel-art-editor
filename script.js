@@ -14,7 +14,9 @@ class PixelArtEditor {
             colorCount: 32,
             quantizationMethod: 'median-cut',
             posterizationLevels: 256,
-            paletteSwap: 'none'
+            paletteSwap: 'none',
+            outlineDetection: 'none',
+            outlineStrength: 50
         };
         
         this.initializeEventListeners();
@@ -32,7 +34,7 @@ class PixelArtEditor {
         fileInput.addEventListener('change', this.handleFileSelect.bind(this));
         
         // Controls
-        const controls = ['pixelSize', 'contrast', 'brightness', 'saturation', 'colorCount', 'posterizationLevels'];
+        const controls = ['pixelSize', 'contrast', 'brightness', 'saturation', 'colorCount', 'posterizationLevels', 'outlineStrength'];
         controls.forEach(control => {
             const slider = document.getElementById(control);
             const valueDisplay = document.getElementById(control + 'Value');
@@ -53,6 +55,12 @@ class PixelArtEditor {
         // Palette swap selector
         document.getElementById('paletteSwap').addEventListener('change', (e) => {
             this.settings.paletteSwap = e.target.value;
+            this.updatePixelArt();
+        });
+        
+        // Outline detection selector
+        document.getElementById('outlineDetection').addEventListener('change', (e) => {
+            this.settings.outlineDetection = e.target.value;
             this.updatePixelArt();
         });
         
@@ -163,6 +171,9 @@ class PixelArtEditor {
         
         // Apply palette swap
         this.applyPaletteSwap(tempCtx, width, height);
+        
+        // Apply outline detection
+        this.applyOutlineDetection(tempCtx, width, height);
         
         // Apply color quantization
         if (this.settings.quantizationMethod !== 'none') {
@@ -596,6 +607,156 @@ class PixelArtEditor {
         ctx.putImageData(imageData, 0, 0);
     }
     
+    applyOutlineDetection(ctx, width, height) {
+        if (this.settings.outlineDetection === 'none') return;
+        
+        const imageData = ctx.getImageData(0, 0, width, height);
+        const data = imageData.data;
+        const strength = this.settings.outlineStrength / 100;
+        
+        // Convert to grayscale for edge detection
+        const grayData = new Uint8ClampedArray(width * height);
+        for (let i = 0; i < data.length; i += 4) {
+            grayData[i / 4] = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+        }
+        
+        const edgeData = new Uint8ClampedArray(width * height);
+        
+        switch (this.settings.outlineDetection) {
+            case 'simple':
+                this.simpleOutlineDetection(grayData, edgeData, width, height);
+                break;
+            case 'sobel':
+                this.sobelOutlineDetection(grayData, edgeData, width, height);
+                break;
+            case 'canny':
+                this.cannyOutlineDetection(grayData, edgeData, width, height);
+                break;
+            case 'laplacian':
+                this.laplacianOutlineDetection(grayData, edgeData, width, height);
+                break;
+        }
+        
+        // Apply edges to original image
+        for (let i = 0; i < data.length; i += 4) {
+            const edgeValue = edgeData[i / 4];
+            const edgeFactor = (edgeValue / 255) * strength;
+            
+            // Create black outlines where edges are detected
+            if (edgeFactor > 0.05) { // Lower threshold for more visible outlines
+                const outlineIntensity = Math.min(1, edgeFactor * 3); // Amplify the effect
+                data[i] = Math.max(0, data[i] - (outlineIntensity * 255));     // Red
+                data[i + 1] = Math.max(0, data[i + 1] - (outlineIntensity * 255)); // Green
+                data[i + 2] = Math.max(0, data[i + 2] - (outlineIntensity * 255)); // Blue
+            }
+        }
+        
+        ctx.putImageData(imageData, 0, 0);
+    }
+    
+    simpleOutlineDetection(grayData, edgeData, width, height) {
+        for (let y = 1; y < height - 1; y++) {
+            for (let x = 1; x < width - 1; x++) {
+                const idx = y * width + x;
+                const current = grayData[idx];
+                
+                // Check 8 neighbors
+                const neighbors = [
+                    grayData[idx - width - 1], grayData[idx - width], grayData[idx - width + 1],
+                    grayData[idx - 1], grayData[idx + 1],
+                    grayData[idx + width - 1], grayData[idx + width], grayData[idx + width + 1]
+                ];
+                
+                let maxDiff = 0;
+                for (const neighbor of neighbors) {
+                    maxDiff = Math.max(maxDiff, Math.abs(current - neighbor));
+                }
+                
+                // Enhance edge detection sensitivity
+                edgeData[idx] = maxDiff > 20 ? maxDiff * 2 : 0;
+            }
+        }
+    }
+    
+    sobelOutlineDetection(grayData, edgeData, width, height) {
+        const sobelX = [-1, 0, 1, -2, 0, 2, -1, 0, 1];
+        const sobelY = [-1, -2, -1, 0, 0, 0, 1, 2, 1];
+        
+        for (let y = 1; y < height - 1; y++) {
+            for (let x = 1; x < width - 1; x++) {
+                const idx = y * width + x;
+                let gx = 0, gy = 0;
+                
+                for (let ky = -1; ky <= 1; ky++) {
+                    for (let kx = -1; kx <= 1; kx++) {
+                        const pixel = grayData[(y + ky) * width + (x + kx)];
+                        const kernelIdx = (ky + 1) * 3 + (kx + 1);
+                        gx += pixel * sobelX[kernelIdx];
+                        gy += pixel * sobelY[kernelIdx];
+                    }
+                }
+                
+                const magnitude = Math.sqrt(gx * gx + gy * gy);
+                // Enhance Sobel sensitivity
+                edgeData[idx] = magnitude > 30 ? Math.min(255, magnitude * 1.5) : 0;
+            }
+        }
+    }
+    
+    cannyOutlineDetection(grayData, edgeData, width, height) {
+        // Simplified Canny: Gaussian blur + Sobel + threshold
+        const blurred = new Uint8ClampedArray(width * height);
+        
+        // Simple Gaussian blur
+        for (let y = 1; y < height - 1; y++) {
+            for (let x = 1; x < width - 1; x++) {
+                const idx = y * width + x;
+                let sum = 0;
+                let count = 0;
+                
+                for (let ky = -1; ky <= 1; ky++) {
+                    for (let kx = -1; kx <= 1; kx++) {
+                        sum += grayData[(y + ky) * width + (x + kx)];
+                        count++;
+                    }
+                }
+                
+                blurred[idx] = sum / count;
+            }
+        }
+        
+        // Apply Sobel to blurred image
+        this.sobelOutlineDetection(blurred, edgeData, width, height);
+        
+        // Threshold - make more sensitive
+        for (let i = 0; i < edgeData.length; i++) {
+            edgeData[i] = edgeData[i] > 25 ? edgeData[i] * 2 : 0;
+        }
+    }
+    
+    laplacianOutlineDetection(grayData, edgeData, width, height) {
+        const laplacian = [0, -1, 0, -1, 4, -1, 0, -1, 0];
+        
+        for (let y = 1; y < height - 1; y++) {
+            for (let x = 1; x < width - 1; x++) {
+                const idx = y * width + x;
+                let sum = 0;
+                
+                for (let ky = -1; ky <= 1; ky++) {
+                    for (let kx = -1; kx <= 1; kx++) {
+                        const pixel = grayData[(y + ky) * width + (x + kx)];
+                        const kernelIdx = (ky + 1) * 3 + (kx + 1);
+                        sum += pixel * laplacian[kernelIdx];
+                    }
+                }
+                
+                // Enhance Laplacian sensitivity
+                const absSum = Math.abs(sum);
+                edgeData[idx] = absSum > 15 ? Math.min(255, absSum * 2) : 0;
+            }
+        }
+    }
+    
     applyPixelation(ctx, width, height) {
         const pixelSize = this.settings.pixelSize;
         
@@ -628,7 +789,9 @@ class PixelArtEditor {
             colorCount: 32,
             quantizationMethod: 'median-cut',
             posterizationLevels: 256,
-            paletteSwap: 'none'
+            paletteSwap: 'none',
+            outlineDetection: 'none',
+            outlineStrength: 50
         };
         
         // Update sliders
@@ -638,6 +801,7 @@ class PixelArtEditor {
         document.getElementById('saturation').value = 100;
         document.getElementById('colorCount').value = 32;
         document.getElementById('posterizationLevels').value = 256;
+        document.getElementById('outlineStrength').value = 50;
         
         // Update displays
         document.getElementById('pixelSizeValue').textContent = '10';
@@ -646,10 +810,12 @@ class PixelArtEditor {
         document.getElementById('saturationValue').textContent = '100';
         document.getElementById('colorCountValue').textContent = '32';
         document.getElementById('posterizationLevelsValue').textContent = '256';
+        document.getElementById('outlineStrengthValue').textContent = '50';
         
         // Update selects
         document.getElementById('quantizationMethod').value = 'median-cut';
         document.getElementById('paletteSwap').value = 'none';
+        document.getElementById('outlineDetection').value = 'none';
         
         this.updatePixelArt();
     }

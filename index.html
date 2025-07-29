@@ -102,6 +102,25 @@
                     </select>
                 </div>
 
+                <div class="control-group">
+                    <label for="outlineDetection">Outline Detection:</label>
+                    <select id="outlineDetection" class="select-control">
+                        <option value="none">None</option>
+                        <option value="simple">Simple</option>
+                        <option value="sobel">Sobel</option>
+                        <option value="canny">Canny</option>
+                        <option value="laplacian">Laplacian</option>
+                    </select>
+                </div>
+
+                <div class="control-group">
+                    <label for="outlineStrength">Outline Strength:</label>
+                    <div class="slider-container">
+                        <input type="range" id="outlineStrength" min="0" max="100" value="75" class="slider">
+                        <span class="slider-value" id="outlineStrengthValue">75</span>
+                    </div>
+                </div>
+
                 <div class="button-group">
                     <button id="resetBtn" class="btn btn-secondary">Reset</button>
                     <button id="downloadBtn" class="btn btn-primary">Download</button>
