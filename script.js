@@ -12,7 +12,8 @@ class PixelArtEditor {
             brightness: 100,
             saturation: 100,
             colorCount: 32,
-            quantizationMethod: 'median-cut'
+            quantizationMethod: 'median-cut',
+            posterizationLevels: 256
         };
         
         this.initializeEventListeners();
@@ -30,7 +31,7 @@ class PixelArtEditor {
         fileInput.addEventListener('change', this.handleFileSelect.bind(this));
         
         // Controls
-        const controls = ['pixelSize', 'contrast', 'brightness', 'saturation', 'colorCount'];
+        const controls = ['pixelSize', 'contrast', 'brightness', 'saturation', 'colorCount', 'posterizationLevels'];
         controls.forEach(control => {
             const slider = document.getElementById(control);
             const valueDisplay = document.getElementById(control + 'Value');
@@ -149,6 +150,9 @@ class PixelArtEditor {
         
         // Apply filters
         this.applyFilters(tempCtx, width, height);
+        
+        // Apply posterization
+        this.applyPosterization(tempCtx, width, height);
         
         // Apply color quantization
         if (this.settings.quantizationMethod !== 'none') {
@@ -496,6 +500,24 @@ class PixelArtEditor {
         return dr * dr + dg * dg + db * db;
     }
     
+    applyPosterization(ctx, width, height) {
+        const imageData = ctx.getImageData(0, 0, width, height);
+        const data = imageData.data;
+        const levels = this.settings.posterizationLevels;
+        
+        // Calculate step size for each color level
+        const step = 256 / levels;
+        
+        for (let i = 0; i < data.length; i += 4) {
+            // Posterize each color channel
+            data[i] = Math.round(data[i] / step) * step;     // Red
+            data[i + 1] = Math.round(data[i + 1] / step) * step; // Green
+            data[i + 2] = Math.round(data[i + 2] / step) * step; // Blue
+        }
+        
+        ctx.putImageData(imageData, 0, 0);
+    }
+    
     applyPixelation(ctx, width, height) {
         const pixelSize = this.settings.pixelSize;
         
@@ -526,7 +548,8 @@ class PixelArtEditor {
             brightness: 100,
             saturation: 100,
             colorCount: 32,
-            quantizationMethod: 'median-cut'
+            quantizationMethod: 'median-cut',
+            posterizationLevels: 256
         };
         
         // Update sliders
@@ -535,6 +558,7 @@ class PixelArtEditor {
         document.getElementById('brightness').value = 100;
         document.getElementById('saturation').value = 100;
         document.getElementById('colorCount').value = 32;
+        document.getElementById('posterizationLevels').value = 256;
         
         // Update displays
         document.getElementById('pixelSizeValue').textContent = '10';
@@ -542,6 +566,7 @@ class PixelArtEditor {
         document.getElementById('brightnessValue').textContent = '100';
         document.getElementById('saturationValue').textContent = '100';
         document.getElementById('colorCountValue').textContent = '32';
+        document.getElementById('posterizationLevelsValue').textContent = '256';
         
         // Update select
         document.getElementById('quantizationMethod').value = 'median-cut';
