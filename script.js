@@ -1,3 +1,8 @@
+// Feature flags
+const FEATURE_FLAGS = {
+    ADVANCED_FEATURES: false // Set to true to enable Posterization, Outline Detection, and Edge Detection
+};
+
 class PixelArtEditor {
     constructor() {
         this.originalImage = null;
@@ -22,8 +27,21 @@ class PixelArtEditor {
         };
         
         this.initializeEventListeners();
+        this.updateFeatureVisibility();
     }
     
+    updateFeatureVisibility() {
+        // Hide/show advanced features based on feature flag
+        const advancedFeatures = ['posterizationLevels', 'outlineDetection', 'outlineStrength', 'edgeDetection', 'edgeStrength'];
+        
+        advancedFeatures.forEach(feature => {
+            const controlGroup = document.querySelector(`[data-control="${feature}"]`);
+            if (controlGroup) {
+                controlGroup.style.display = FEATURE_FLAGS.ADVANCED_FEATURES ? 'flex' : 'none';
+            }
+        });
+    }
+
     initializeEventListeners() {
         // File upload
         const uploadArea = document.getElementById('uploadArea');
@@ -36,16 +54,22 @@ class PixelArtEditor {
         fileInput.addEventListener('change', this.handleFileSelect.bind(this));
         
         // Controls
-        const controls = ['pixelSize', 'contrast', 'brightness', 'saturation', 'colorCount', 'posterizationLevels', 'outlineStrength', 'edgeStrength'];
+        const controls = ['pixelSize', 'contrast', 'brightness', 'saturation', 'colorCount'];
+        if (FEATURE_FLAGS.ADVANCED_FEATURES) {
+            controls.push('posterizationLevels', 'outlineStrength', 'edgeStrength');
+        }
+        
         controls.forEach(control => {
             const slider = document.getElementById(control);
             const valueDisplay = document.getElementById(control + 'Value');
             
-            slider.addEventListener('input', (e) => {
-                this.settings[control] = parseInt(e.target.value);
-                valueDisplay.textContent = e.target.value;
-                this.updatePixelArt();
-            });
+            if (slider && valueDisplay) {
+                slider.addEventListener('input', (e) => {
+                    this.settings[control] = parseInt(e.target.value);
+                    valueDisplay.textContent = e.target.value;
+                    this.updatePixelArt();
+                });
+            }
         });
         
         // Quantization method selector
@@ -60,17 +84,21 @@ class PixelArtEditor {
             this.updatePixelArt();
         });
         
-        // Outline detection selector
-        document.getElementById('outlineDetection').addEventListener('change', (e) => {
-            this.settings.outlineDetection = e.target.value;
-            this.updatePixelArt();
-        });
+        // Outline detection selector (only if feature is enabled)
+        if (FEATURE_FLAGS.ADVANCED_FEATURES) {
+            document.getElementById('outlineDetection').addEventListener('change', (e) => {
+                this.settings.outlineDetection = e.target.value;
+                this.updatePixelArt();
+            });
+        }
         
-        // Edge detection selector
-        document.getElementById('edgeDetection').addEventListener('change', (e) => {
-            this.settings.edgeDetection = e.target.value;
-            this.updatePixelArt();
-        });
+        // Edge detection selector (only if feature is enabled)
+        if (FEATURE_FLAGS.ADVANCED_FEATURES) {
+            document.getElementById('edgeDetection').addEventListener('change', (e) => {
+                this.settings.edgeDetection = e.target.value;
+                this.updatePixelArt();
+            });
+        }
         
         // Buttons
         document.getElementById('resetBtn').addEventListener('click', this.resetSettings.bind(this));
@@ -174,17 +202,23 @@ class PixelArtEditor {
         // Apply filters
         this.applyFilters(tempCtx, width, height);
         
-        // Apply posterization
-        this.applyPosterization(tempCtx, width, height);
+        // Apply posterization (only if feature is enabled)
+        if (FEATURE_FLAGS.ADVANCED_FEATURES) {
+            this.applyPosterization(tempCtx, width, height);
+        }
         
         // Apply palette swap
         this.applyPaletteSwap(tempCtx, width, height);
         
-        // Apply outline detection
-        this.applyOutlineDetection(tempCtx, width, height);
+        // Apply outline detection (only if feature is enabled)
+        if (FEATURE_FLAGS.ADVANCED_FEATURES) {
+            this.applyOutlineDetection(tempCtx, width, height);
+        }
         
-        // Apply edge detection
-        this.applyEdgeDetection(tempCtx, width, height);
+        // Apply edge detection (only if feature is enabled)
+        if (FEATURE_FLAGS.ADVANCED_FEATURES) {
+            this.applyEdgeDetection(tempCtx, width, height);
+        }
         
         // Apply color quantization
         if (this.settings.quantizationMethod !== 'none') {
