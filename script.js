@@ -800,12 +800,12 @@ class PixelArtEditor {
             const edgeValue = edgeData[i / 4];
             const edgeFactor = (edgeValue / 255) * strength;
             
-            // Create white edges where edges are detected
+            // Create black edges where edges are detected
             if (edgeFactor > 0.1) {
                 const edgeIntensity = Math.min(1, edgeFactor * 2);
-                data[i] = Math.min(255, data[i] + (edgeIntensity * 255));     // Red
-                data[i + 1] = Math.min(255, data[i + 1] + (edgeIntensity * 255)); // Green
-                data[i + 2] = Math.min(255, data[i + 2] + (edgeIntensity * 255)); // Blue
+                data[i] = Math.max(0, data[i] - (edgeIntensity * 255));     // Red
+                data[i + 1] = Math.max(0, data[i + 1] - (edgeIntensity * 255)); // Green
+                data[i + 2] = Math.max(0, data[i + 2] - (edgeIntensity * 255)); // Blue
             }
         }
         
