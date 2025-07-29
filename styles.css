@@ -107,6 +107,10 @@ header p {
     border-bottom: 2px solid #f0f0f0;
 }
 
+.palette-section {
+    margin-bottom: 20px;
+}
+
 .control-group {
     display: flex;
     flex-direction: column;

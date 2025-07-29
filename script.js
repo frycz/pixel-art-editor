@@ -40,6 +40,17 @@ class PixelArtEditor {
                 controlGroup.style.display = FEATURE_FLAGS.ADVANCED_FEATURES ? 'flex' : 'none';
             }
         });
+        
+        // Hide/show color count based on quantization method
+        this.updateColorCountVisibility();
+    }
+    
+    updateColorCountVisibility() {
+        const colorCountGroup = document.querySelector('[data-control="colorCount"]');
+        if (colorCountGroup) {
+            const shouldShow = this.settings.quantizationMethod !== 'none';
+            colorCountGroup.style.display = shouldShow ? 'flex' : 'none';
+        }
     }
 
     initializeEventListeners() {
@@ -75,6 +86,7 @@ class PixelArtEditor {
         // Quantization method selector
         document.getElementById('quantizationMethod').addEventListener('change', (e) => {
             this.settings.quantizationMethod = e.target.value;
+            this.updateColorCountVisibility();
             this.updatePixelArt();
         });
         

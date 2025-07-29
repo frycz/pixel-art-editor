@@ -65,7 +65,7 @@
                     </div>
                 </div>
 
-                <div class="control-group">
+                <div class="control-group" data-control="colorCount">
                     <label for="colorCount">Color Count:</label>
                     <div class="slider-container">
                         <input type="range" id="colorCount" min="2" max="256" value="32" class="slider">
@@ -82,15 +82,9 @@
                         <option value="none">None</option>
                     </select>
                 </div>
+            </div>
 
-                <div class="control-group" data-control="posterizationLevels">
-                    <label for="posterizationLevels">Posterization Levels:</label>
-                    <div class="slider-container">
-                        <input type="range" id="posterizationLevels" min="2" max="256" value="256" class="slider">
-                        <span class="slider-value" id="posterizationLevelsValue">256</span>
-                    </div>
-                </div>
-
+            <div class="palette-section">
                 <div class="control-group">
                     <label for="paletteSwap">Palette Swap:</label>
                     <select id="paletteSwap" class="select-control">
@@ -103,6 +97,17 @@
                         <option value="neon">Neon</option>
                         <option value="pastel">Pastel</option>
                     </select>
+                </div>
+            </div>
+
+            <div class="controls-panel">
+
+                <div class="control-group" data-control="posterizationLevels">
+                    <label for="posterizationLevels">Posterization Levels:</label>
+                    <div class="slider-container">
+                        <input type="range" id="posterizationLevels" min="2" max="256" value="256" class="slider">
+                        <span class="slider-value" id="posterizationLevelsValue">256</span>
+                    </div>
                 </div>
 
                 <div class="control-group" data-control="outlineDetection">
