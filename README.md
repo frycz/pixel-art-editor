@@ -2,6 +2,8 @@
 
 A modern web application that allows you to upload images and convert them to pixel art style with real-time adjustments.
 
+![Pixel Art Editor Screenshot](images/screenshot.png)
+
 ## Features
 
 - **Image Upload**: Drag and drop or click to upload images (JPG, PNG, GIF)
