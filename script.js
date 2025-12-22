@@ -1066,7 +1066,45 @@ class PixelArtEditor {
     }
 }
 
+// Theme Toggle
+function initThemeToggle() {
+    const themeToggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
+
+    // Check for saved theme preference or default to system preference
+    const savedTheme = localStorage.getItem('theme');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if (savedTheme) {
+        html.setAttribute('data-theme', savedTheme);
+    } else if (systemPrefersDark) {
+        html.setAttribute('data-theme', 'dark');
+    }
+
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = html.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+        html.setAttribute('data-theme', newTheme === 'light' ? '' : newTheme);
+        if (newTheme === 'light') {
+            html.removeAttribute('data-theme');
+        }
+        localStorage.setItem('theme', newTheme);
+    });
+
+    // Listen for system theme changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (!localStorage.getItem('theme')) {
+            html.setAttribute('data-theme', e.matches ? 'dark' : '');
+            if (!e.matches) {
+                html.removeAttribute('data-theme');
+            }
+        }
+    });
+}
+
 // Initialize the editor when the page loads
 document.addEventListener('DOMContentLoaded', () => {
+    initThemeToggle();
     new PixelArtEditor();
 }); 

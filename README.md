@@ -2,7 +2,12 @@
 
 A modern web application that allows you to upload images and convert them to pixel art style with real-time adjustments.
 
+
+![Pixel Art Editor Screenshot Dark](images/screenshot-dark.png)
+
+
 ![Pixel Art Editor Screenshot](images/screenshot.png)
+
 
 ## Features
 
