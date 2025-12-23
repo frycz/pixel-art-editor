@@ -2,6 +2,7 @@
 
 A modern web application that allows you to upload images and convert them to pixel art style with real-time adjustments.
 
+[Demo](https://frycz.github.io/pixel-art-editor/)
 
 ![Pixel Art Editor Screenshot Dark](images/screenshot-dark.png)
 
